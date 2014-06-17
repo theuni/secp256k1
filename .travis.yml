@@ -1,0 +1,26 @@
+language: cpp
+compiler: gcc
+install:
+  - sudo apt-get install yasm libgmp-dev
+env:
+  matrix:
+    - ENDOMORPHISM=yes BIGNUM=gmp     FIELD=gmp       BUILD=check
+    - ENDOMORPHISM=no  BIGNUM=gmp     FIELD=gmp       BUILD=check
+    - ENDOMORPHISM=yes BIGNUM=openssl FIELD=gmp       BUILD=check
+    - ENDOMORPHISM=no  BIGNUM=openssl FIELD=gmp       BUILD=check
+    - ENDOMORPHISM=yes BIGNUM=gmp     FIELD=64bit     BUILD=check
+    - ENDOMORPHISM=no  BIGNUM=gmp     FIELD=64bit     BUILD=check
+    - ENDOMORPHISM=yes BIGNUM=openssl FIELD=64bit     BUILD=check
+    - ENDOMORPHISM=no  BIGNUM=openssl FIELD=64bit     BUILD=check
+    - ENDOMORPHISM=yes BIGNUM=gmp     FIELD=64bit_asm BUILD=check
+    - ENDOMORPHISM=no  BIGNUM=gmp     FIELD=64bit_asm BUILD=check
+    - ENDOMORPHISM=yes BIGNUM=openssl FIELD=64bit_asm BUILD=check
+    - ENDOMORPHISM=no  BIGNUM=openssl FIELD=64bit_asm BUILD=check
+    - ENDOMORPHISM=yes BIGNUM=gmp     FIELD=32bit     BUILD=check
+    - ENDOMORPHISM=no  BIGNUM=gmp     FIELD=32bit     BUILD=check
+    - ENDOMORPHISM=yes BIGNUM=openssl FIELD=32bit     BUILD=check
+    - ENDOMORPHISM=no  BIGNUM=openssl FIELD=32bit     BUILD=check
+    - ENDOMORPHISM=no  BIGNUM=auto    FIELD=auto      BUILD=distcheck
+before_script: ./autogen.sh
+script: ./configure --enable-endomorphism=$ENDOMORPHISM --with-field=$FIELD --with-bignum=$BIGNUM && make -j2 $BUILD
+os: linux
