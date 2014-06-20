@@ -320,7 +320,7 @@ if test x"$use_extra_compiler_warnings" = x"yes"; then
 fi
 
 if test x"$use_warnings_as_errors" = x"yes"; then
-  AX_CHECK_COMPILE_FLAG([-Werror], [WARNING_CFLAGS="-Werror"], AC_MSG_ERROR([-Werror not supported]))
+  AX_CHECK_COMPILE_FLAG([-Werror], [WARNING_CFLAGS="$WARNING_CFLAGS -Werror"], AC_MSG_ERROR([-Werror not supported]))
 fi
 
 AC_MSG_NOTICE([Using field implementation: $set_field])
