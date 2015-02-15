@@ -80,6 +80,12 @@ AC_COMPILE_IFELSE([AC_LANG_SOURCE([[char foo;]])],
       CFLAGS="$saved_CFLAGS"
     ])
 
+AC_CHECK_HEADERS([byteswap.h])
+AC_CHECK_DECLS([bswap_32],,,[
+#ifdef HAVE_BYTESWAP_H
+#include <byteswap.h>
+#endif
+])
 
 AC_ARG_ENABLE(benchmark,
     AS_HELP_STRING([--enable-benchmark],[compile benchmark (default is no)]),
