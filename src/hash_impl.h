@@ -13,6 +13,10 @@
 #include <stdint.h>
 #include <string.h>
 
+#ifdef HAVE_BYTESWAP_H
+#include <byteswap.h>
+#endif
+
 #define Ch(x,y,z) ((z) ^ ((x) & ((y) ^ (z))))
 #define Maj(x,y,z) (((x) & (y)) | ((z) & ((x) | (y))))
 #define Sigma0(x) (((x) >> 2 | (x) << 30) ^ ((x) >> 13 | (x) << 19) ^ ((x) >> 22 | (x) << 10))
@@ -27,8 +31,22 @@
     (h) = t1 + t2; \
 } while(0)
 
+#ifdef WORDS_BIGENDIAN
+static SECP256K1_INLINE uint32_t ReadBE32_(const uint32_t* p) { return *p; }
+static SECP256K1_INLINE void WriteBE32_(uint32_t* p, uint32_t v) { *p = v; }
+#define ReadBE32(p) ReadBE32_((const uint32_t*)(p))
+#define WriteBE32(p, v) WriteBE32_((uint32_t*)(p), (v))
+#else
+#ifdef HAVE_DECL_BSWAP_32
+static SECP256K1_INLINE uint32_t ReadBE32_(const uint32_t* p) { return bswap_32(*p); }
+static SECP256K1_INLINE void WriteBE32_(uint32_t* p, uint32_t v) { *p = bswap_32(v); }
+#define ReadBE32(p) ReadBE32_((const uint32_t*)(p))
+#define WriteBE32(p, v) WriteBE32_((uint32_t*)(p), (v))
+#else
 #define ReadBE32(p) (((uint32_t)((p)[0])) << 24 | ((uint32_t)((p)[1])) << 16 | ((uint32_t)((p)[2])) << 8 | ((uint32_t)((p)[3])))
 #define WriteBE32(p, v) do { (p)[0] = (v) >> 24; (p)[1] = (v) >> 16; (p)[2] = (v) >> 8; (p)[3] = (v); } while(0)
+#endif
+#endif
 
 static void secp256k1_sha256_initialize(secp256k1_sha256_t *hash) {
     hash->s[0] = 0x6a09e667ul;
