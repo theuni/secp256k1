@@ -57,3 +57,6 @@ script:
  - if [ "x$HOST" = "xi686-linux-gnu" ]; then export CC="$CC -m32"; fi
  - ./configure --enable-endomorphism=$ENDOMORPHISM --with-field=$FIELD --with-bignum=$BIGNUM --with-scalar=$SCALAR $EXTRAFLAGS $USE_HOST && make -j2 $BUILD
 os: linux
+language: java
+
+
