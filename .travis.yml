@@ -56,7 +56,5 @@ script:
  - if [ -n "$HOST" ]; then export USE_HOST="--host=$HOST"; fi
  - if [ "x$HOST" = "xi686-linux-gnu" ]; then export CC="$CC -m32"; fi
  - ./configure --enable-endomorphism=$ENDOMORPHISM --with-field=$FIELD --with-bignum=$BIGNUM --with-scalar=$SCALAR $EXTRAFLAGS $USE_HOST && make -j2 $BUILD
+ - gradle build run
 os: linux
-language: java
-
-

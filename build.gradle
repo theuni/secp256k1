@@ -5,16 +5,23 @@ buildscript {
 }
 
 apply plugin: 'java'
+apply plugin: 'application'
 
 repositories {
     mavenCentral()
 }
 
+applicationDefaultJvmArgs = ["-Djava.library.path=.libs"]
+mainClassName = "org.bitcoin.NativeSecp256k1Test"
+
 dependencies {
     compile 'com.google.guava:guava:18.0'
 }
 
-task wrapper(type: Wrapper) {
-    gradleVersion = '2.2.1'
+sourceSets {
+    main {
+        java {
+            srcDir 'src/java/org/bitcoin'
+        }
+    }
 }
-
