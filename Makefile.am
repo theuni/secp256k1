@@ -74,4 +74,17 @@ tests_LDFLAGS = -static
 TESTS = tests
 endif
 
+if USE_ECMULT_STATIC_CONTEXT
+noinst_PROGRAMS += gen_context
+gen_context_SOURCES = src/gen_context.c
+gen_context_CPPFLAGS = -DVERIFY $(SECP_INCLUDES) $(SECP_TEST_INCLUDES)
+gen_context_LDADD = $(SECP_LIBS) $(SECP_TEST_LIBS)
+gen_context_LDFLAGS = -static
+
+BUILT_SOURCES = src/ecmult_static_context.h
+
+src/ecmult_static_context.h: gen_context
+	./gen_context
+endif
+
 EXTRA_DIST = autogen.sh

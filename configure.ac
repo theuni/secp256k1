@@ -95,6 +95,11 @@ AC_ARG_ENABLE(endomorphism,
     AS_HELP_STRING([--enable-endomorphism],[enable endomorphism (default is no)]),
     [use_endomorphism=$enableval],
     [use_endomorphism=no])
+    
+AC_ARG_ENABLE(ecmult_static_context,
+    AS_HELP_STRING([--enable-ecmult-static-context],[enable ecmult static context for signing (default is no)]),
+    [use_ecmult_static_context=$enableval],
+    [use_ecmult_static_context=no])
 
 AC_ARG_WITH([field], [AS_HELP_STRING([--with-field=64bit|32bit|auto],
 [Specify Field Implementation. Default is auto])],[req_field=$withval], [req_field=auto])
@@ -305,6 +310,10 @@ if test x"$use_endomorphism" = x"yes"; then
   AC_DEFINE(USE_ENDOMORPHISM, 1, [Define this symbol to use endomorphism optimization])
 fi
 
+if test x"$use_ecmult_static_context" = x"yes"; then
+  AC_DEFINE(USE_ECMULT_STATIC_CONTEXT, 1, [Define this symbol to use a statically generated ecmult context])
+fi
+
 AC_C_BIGENDIAN()
 
 AC_MSG_NOTICE([Using assembly optimizations: $set_asm])
@@ -321,6 +330,7 @@ AC_SUBST(SECP_TEST_LIBS)
 AC_SUBST(SECP_TEST_INCLUDES)
 AM_CONDITIONAL([USE_TESTS], [test x"$use_tests" != x"no"])
 AM_CONDITIONAL([USE_BENCHMARK], [test x"$use_benchmark" = x"yes"])
+AM_CONDITIONAL([USE_ECMULT_STATIC_CONTEXT], [test x"$use_ecmult_static_context" = x"yes"])
 
 dnl make sure nothing new is exported so that we don't break the cache
 PKGCONFIG_PATH_TEMP="$PKG_CONFIG_PATH"
