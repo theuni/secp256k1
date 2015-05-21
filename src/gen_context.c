@@ -4,45 +4,58 @@
  * file COPYING or http://www.opensource.org/licenses/mit-license.php.*
  **********************************************************************/
 
-#if defined HAVE_CONFIG_H
-#include "libsecp256k1-config.h"
-#endif
+#define USE_BASIC_CONFIG 1
 
-#undef USE_ECMULT_STATIC_CONTEXT
-#include "secp256k1.c"
+#include "basic-config.h"
+#include "include/secp256k1.h"
+#include "field_impl.h"
+#include "scalar_impl.h"
+#include "group_impl.h"
+#include "ecmult_gen_impl.h"
 
 int main(int argc, char **argv) {
     secp256k1_ecmult_gen_context_t ctx;
-    uint8_t* ctx_bytes;
-    int ctx_len;
-    int i;
+    int inner;
+    int outer;
     FILE* fp;
 
     (void)argc;
     (void)argv;
 
     fp = fopen("src/ecmult_static_context.h","w");
+    if (fp == NULL) {
+        fprintf(stderr, "Could not open src/ecmult_static_context.h for writing!\n");
+        return -1;
+    }
     
     fprintf(fp, "#ifndef _SECP256K1_ECMULT_STATIC_CONTEXT_\n");
     fprintf(fp, "#define _SECP256K1_ECMULT_STATIC_CONTEXT_\n");
-    fprintf(fp, "static const uint8_t secp256k1_ecmult_static_context[] = {\n");
+    fprintf(fp, "#include \"group.h\"\n");
+    fprintf(fp, "#define SC SECP256K1_GE_STORAGE_CONST\n");
+    fprintf(fp, "static const secp256k1_ge_storage_t secp256k1_ecmult_static_context[64][16] = {\n");
 
     secp256k1_ecmult_gen_context_init(&ctx);
     secp256k1_ecmult_gen_context_build(&ctx);
-    ctx_bytes = (uint8_t*)ctx.prec;
-    ctx_len = sizeof(*ctx.prec);
-    for (i = 0; i < ctx_len; i++) {
-        fprintf(fp, "0x%02x", ctx_bytes[i]);
-        if (i < (ctx_len - 1)) {
-           fprintf(fp, ",");
+    for(outer = 0; outer != 64; outer++) {
+        fprintf(fp,"{\n");
+        for(inner = 0; inner != 16; inner++) {
+            fprintf(fp,"    SC(%uu, %uu, %uu, %uu, %uu, %uu, %uu, %uu, %uu, %uu, %uu, %uu, %uu, %uu, %uu, %uu)", SECP256K1_GE_STORAGE_CONST_GET((*ctx.prec)[outer][inner]));
+            if (inner != 15) {
+                fprintf(fp,",\n");
+            } else {
+                fprintf(fp,"\n");
+            }
         }
-        if ((i % 20) == 19) {
-            fprintf(fp, "\n");
+        if (outer != 63) {
+            fprintf(fp,"},\n");
+        } else {
+            fprintf(fp,"}\n");
         }
     }
+    fprintf(fp,"};\n");
     secp256k1_ecmult_gen_context_clear(&ctx);
     
-    fprintf(fp, "};\n");
+    fprintf(fp, "#undef SC\n");
     fprintf(fp, "#endif\n");
     fclose(fp);
     

@@ -75,11 +75,16 @@ TESTS = tests
 endif
 
 if USE_ECMULT_STATIC_CONTEXT
-noinst_PROGRAMS += gen_context
-gen_context_SOURCES = src/gen_context.c
-gen_context_CPPFLAGS = -DVERIFY $(SECP_INCLUDES) $(SECP_TEST_INCLUDES)
-gen_context_LDADD = $(SECP_LIBS) $(SECP_TEST_LIBS)
-gen_context_LDFLAGS = -static
+CPPFLAGS_FOR_BUILD +=-I.
+CFLAGS_FOR_BUILD += -Wall -Wextra -Wno-unused-function
+
+gen_context_OBJECTS = gen_context.o
+
+gen_%.o: src/gen_%.c
+	$(CC_FOR_BUILD) $(CPPFLAGS_FOR_BUILD) $(CFLAGS_FOR_BUILD) -c $< -o $@
+
+gen_context$(BUILD_EXEEXT): $(gen_context_OBJECTS)
+	$(CC_FOR_BUILD) $^ -o $@
 
 BUILT_SOURCES = src/ecmult_static_context.h
 
