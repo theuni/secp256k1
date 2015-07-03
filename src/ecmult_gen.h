@@ -11,6 +11,11 @@
 #include "group.h"
 
 typedef struct {
+     secp256k1_scalar_t val;
+     secp256k1_gej_t initial;
+} secp256k1_ecmult_gen_blind_t;
+
+typedef struct {
     /* For accelerating the computation of a*G:
      * To harden against timing attacks, use the following mechanism:
      * * Break up the multiplicand into groups of 4 bits, called n_0, n_1, n_2, ..., n_63.
@@ -24,8 +29,7 @@ typedef struct {
      * the intermediate sums while computing a*G.
      */
     secp256k1_ge_storage_t (*prec)[64][16]; /* prec[j][i] = 16^j * i * G + U_i */
-    secp256k1_scalar_t blind;
-    secp256k1_gej_t initial;
+    secp256k1_ecmult_gen_blind_t blind;
 } secp256k1_ecmult_gen_context_t;
 
 static void secp256k1_ecmult_gen_context_init(secp256k1_ecmult_gen_context_t* ctx);
@@ -38,6 +42,6 @@ static int secp256k1_ecmult_gen_context_is_built(const secp256k1_ecmult_gen_cont
 /** Multiply with the generator: R = a*G */
 static void secp256k1_ecmult_gen(const secp256k1_ecmult_gen_context_t* ctx, secp256k1_gej_t *r, const secp256k1_scalar_t *a);
 
-static void secp256k1_ecmult_gen_blind(secp256k1_ecmult_gen_context_t *ctx, const unsigned char *seed32);
+static void secp256k1_ecmult_gen_blind(secp256k1_ecmult_gen_context_t* ctx, const unsigned char *seed32);
 
 #endif
