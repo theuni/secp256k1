@@ -98,7 +98,7 @@ static int secp256k1_eckey_privkey_serialize(const secp256k1_ecmult_gen_context_
     secp256k1_gej_t rp;
     secp256k1_ge_t r;
     int pubkeylen = 0;
-    secp256k1_ecmult_gen(ctx, &rp, key);
+    secp256k1_ecmult_gen(ctx, &ctx->blind, &rp, key);
     secp256k1_ge_set_gej(&r, &rp);
     if (compressed) {
         static const unsigned char begin[] = {

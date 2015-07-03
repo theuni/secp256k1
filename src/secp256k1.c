@@ -260,7 +260,7 @@ int secp256k1_ec_pubkey_create(const secp256k1_context_t* ctx, unsigned char *pu
 
     secp256k1_scalar_set_b32(&sec, seckey, &overflow);
     if (!overflow) {
-        secp256k1_ecmult_gen(&ctx->ecmult_gen_ctx, &pj, &sec);
+        secp256k1_ecmult_gen(&ctx->ecmult_gen_ctx, &ctx->ecmult_gen_ctx.blind, &pj, &sec);
         secp256k1_scalar_clear(&sec);
         secp256k1_ge_set_gej(&p, &pj);
         ret = secp256k1_eckey_pubkey_serialize(&p, pubkey, pubkeylen, compressed);
@@ -414,6 +414,6 @@ int secp256k1_ec_privkey_import(const secp256k1_context_t* ctx, unsigned char *s
 int secp256k1_context_randomize(secp256k1_context_t* ctx, const unsigned char *seed32) {
     DEBUG_CHECK(ctx != NULL);
     DEBUG_CHECK(secp256k1_ecmult_gen_context_is_built(&ctx->ecmult_gen_ctx));
-    secp256k1_ecmult_gen_blind(&ctx->ecmult_gen_ctx, seed32);
+    secp256k1_ecmult_gen_blind(&ctx->ecmult_gen_ctx, &ctx->ecmult_gen_ctx.blind, seed32);
     return 1;
 }

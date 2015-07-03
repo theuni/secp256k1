@@ -40,8 +40,8 @@ static void secp256k1_ecmult_gen_context_clear(secp256k1_ecmult_gen_context_t* c
 static int secp256k1_ecmult_gen_context_is_built(const secp256k1_ecmult_gen_context_t* ctx);
 
 /** Multiply with the generator: R = a*G */
-static void secp256k1_ecmult_gen(const secp256k1_ecmult_gen_context_t* ctx, secp256k1_gej_t *r, const secp256k1_scalar_t *a);
+static void secp256k1_ecmult_gen(const secp256k1_ecmult_gen_context_t* ctx, const secp256k1_ecmult_gen_blind_t* blind, secp256k1_gej_t *r, const secp256k1_scalar_t *a);
 
-static void secp256k1_ecmult_gen_blind(secp256k1_ecmult_gen_context_t* ctx, const unsigned char *seed32);
+static void secp256k1_ecmult_gen_blind(const secp256k1_ecmult_gen_context_t* ctx, secp256k1_ecmult_gen_blind_t* blind, const unsigned char *seed32);
 
 #endif

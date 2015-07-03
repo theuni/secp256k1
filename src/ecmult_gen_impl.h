@@ -82,7 +82,7 @@ static void secp256k1_ecmult_gen_context_build(secp256k1_ecmult_gen_context_t *c
 #else
     ctx->prec = (secp256k1_ge_storage_t (*)[64][16])secp256k1_ecmult_static_context;
 #endif
-    secp256k1_ecmult_gen_blind(ctx, NULL);
+    secp256k1_ecmult_gen_blind(ctx, &ctx->blind, NULL);
 }
 
 static int secp256k1_ecmult_gen_context_is_built(const secp256k1_ecmult_gen_context_t* ctx) {
@@ -114,16 +114,16 @@ static void secp256k1_ecmult_gen_context_clear(secp256k1_ecmult_gen_context_t *c
     ctx->prec = NULL;
 }
 
-static void secp256k1_ecmult_gen(const secp256k1_ecmult_gen_context_t *ctx, secp256k1_gej_t *r, const secp256k1_scalar_t *gn) {
+static void secp256k1_ecmult_gen(const secp256k1_ecmult_gen_context_t *ctx, const secp256k1_ecmult_gen_blind_t* blind, secp256k1_gej_t *r, const secp256k1_scalar_t *gn) {
     secp256k1_ge_t add;
     secp256k1_ge_storage_t adds;
     secp256k1_scalar_t gnb;
     int bits;
     int i, j;
     memset(&adds, 0, sizeof(adds));
-    *r = ctx->blind.initial;
+    *r = blind->initial;
     /* Blind scalar/point multiplication by computing (n-b)G + bG instead of nG. */
-    secp256k1_scalar_add(&gnb, gn, &ctx->blind.val);
+    secp256k1_scalar_add(&gnb, gn, &blind->val);
     add.infinity = 0;
     for (j = 0; j < 64; j++) {
         bits = secp256k1_scalar_get_bits(&gnb, j * 4, 4);
@@ -149,7 +149,7 @@ static void secp256k1_ecmult_gen(const secp256k1_ecmult_gen_context_t *ctx, secp
 }
 
 /* Setup blinding values for secp256k1_ecmult_gen. */
-static void secp256k1_ecmult_gen_blind(secp256k1_ecmult_gen_context_t* ctx, const unsigned char *seed32) {
+static void secp256k1_ecmult_gen_blind(const secp256k1_ecmult_gen_context_t* ctx, secp256k1_ecmult_gen_blind_t* blind, const unsigned char *seed32) {
     secp256k1_scalar_t b;
     secp256k1_gej_t gb;
     secp256k1_fe_t s;
@@ -158,9 +158,9 @@ static void secp256k1_ecmult_gen_blind(secp256k1_ecmult_gen_context_t* ctx, cons
     int retry;
     if (!seed32) {
         /* When seed is NULL, reset the initial point and blinding value. */
-        secp256k1_gej_set_ge(&ctx->blind.initial, &secp256k1_ge_const_g);
-        secp256k1_gej_neg(&ctx->blind.initial, &ctx->blind.initial);
-        secp256k1_scalar_set_int(&ctx->blind.val, 1);
+        secp256k1_gej_set_ge(&blind->initial, &secp256k1_ge_const_g);
+        secp256k1_gej_neg(&blind->initial, &blind->initial);
+        secp256k1_scalar_set_int(&blind->val, 1);
     }
     /* The prior blinding value (if not reset) is chained forward by including it in the hash. */
     secp256k1_scalar_get_b32(nonce32, &ctx->blind.val);
@@ -176,7 +176,7 @@ static void secp256k1_ecmult_gen_blind(secp256k1_ecmult_gen_context_t* ctx, cons
         retry |= secp256k1_fe_is_zero(&s);
     } while (retry);
     /* Randomize the projection to defend against multiplier sidechannels. */
-    secp256k1_gej_rescale(&ctx->blind.initial, &s);
+    secp256k1_gej_rescale(&blind->initial, &s);
     secp256k1_fe_clear(&s);
     do {
         secp256k1_rfc6979_hmac_sha256_generate(&rng, nonce32, 32);
@@ -186,10 +186,10 @@ static void secp256k1_ecmult_gen_blind(secp256k1_ecmult_gen_context_t* ctx, cons
     } while (retry);
     secp256k1_rfc6979_hmac_sha256_finalize(&rng);
     memset(nonce32, 0, 32);
-    secp256k1_ecmult_gen(ctx, &gb, &b);
+    secp256k1_ecmult_gen(ctx, &ctx->blind, &gb, &b);
     secp256k1_scalar_negate(&b, &b);
-    ctx->blind.val = b;
-    ctx->blind.initial = gb;
+    blind->val = b;
+    blind->initial = gb;
     secp256k1_scalar_clear(&b);
     secp256k1_gej_clear(&gb);
 }

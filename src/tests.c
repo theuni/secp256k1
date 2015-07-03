@@ -127,7 +127,7 @@ void run_context_tests(void) {
     /*** attempt to use them ***/
     random_scalar_order_test(&msg);
     random_scalar_order_test(&key);
-    secp256k1_ecmult_gen(&both->ecmult_gen_ctx, &pubj, &key);
+    secp256k1_ecmult_gen(&both->ecmult_gen_ctx, &both->ecmult_gen_ctx.blind, &pubj, &key);
     secp256k1_ge_set_gej(&pub, &pubj);
 
     /* obtain a working nonce */
@@ -1317,7 +1317,7 @@ void test_ecmult_constants(void) {
     secp256k1_ge_neg(&ng, &secp256k1_ge_const_g);
     for (i = 0; i < 36; i++ ) {
         secp256k1_scalar_set_int(&x, i);
-        secp256k1_ecmult_gen(&ctx->ecmult_gen_ctx, &r, &x);
+        secp256k1_ecmult_gen(&ctx->ecmult_gen_ctx, &ctx->ecmult_gen_ctx.blind, &r, &x);
         for (j = 0; j < i; j++) {
             if (j == i - 1) {
                 ge_equals_gej(&secp256k1_ge_const_g, &r);
@@ -1329,7 +1329,7 @@ void test_ecmult_constants(void) {
     for (i = 1; i <= 36; i++ ) {
         secp256k1_scalar_set_int(&x, i);
         secp256k1_scalar_negate(&x, &x);
-        secp256k1_ecmult_gen(&ctx->ecmult_gen_ctx, &r, &x);
+        secp256k1_ecmult_gen(&ctx->ecmult_gen_ctx, &ctx->ecmult_gen_ctx.blind, &r, &x);
         for (j = 0; j < i; j++) {
             if (j == i - 1) {
                 ge_equals_gej(&ng, &r);
@@ -1354,15 +1354,15 @@ void test_ecmult_gen_blind(void) {
     secp256k1_gej_t i;
     secp256k1_ge_t pge;
     random_scalar_order_test(&key);
-    secp256k1_ecmult_gen(&ctx->ecmult_gen_ctx, &pgej, &key);
+    secp256k1_ecmult_gen(&ctx->ecmult_gen_ctx, &ctx->ecmult_gen_ctx.blind, &pgej, &key);
     secp256k1_rand256(seed32);
-    b = ctx->ecmult_gen_ctx.blind;
-    i = ctx->ecmult_gen_ctx.initial;
-    secp256k1_ecmult_gen_blind(&ctx->ecmult_gen_ctx, seed32);
-    CHECK(!secp256k1_scalar_eq(&b, &ctx->ecmult_gen_ctx.blind));
-    secp256k1_ecmult_gen(&ctx->ecmult_gen_ctx, &pgej2, &key);
+    b = ctx->ecmult_gen_ctx.blind.val;
+    i = ctx->ecmult_gen_ctx.blind.initial;
+    secp256k1_ecmult_gen_blind(&ctx->ecmult_gen_ctx, &ctx->ecmult_gen_ctx.blind, seed32);
+    CHECK(!secp256k1_scalar_eq(&b, &ctx->ecmult_gen_ctx.blind.val));
+    secp256k1_ecmult_gen(&ctx->ecmult_gen_ctx, &ctx->ecmult_gen_ctx.blind, &pgej2, &key);
     CHECK(!gej_xyz_equals_gej(&pgej, &pgej2));
-    CHECK(!gej_xyz_equals_gej(&i, &ctx->ecmult_gen_ctx.initial));
+    CHECK(!gej_xyz_equals_gej(&i, &ctx->ecmult_gen_ctx.blind.initial));
     secp256k1_ge_set_gej(&pge, &pgej);
     ge_equals_gej(&pge, &pgej2);
 }
@@ -1371,12 +1371,12 @@ void test_ecmult_gen_blind_reset(void) {
     /* Test ecmult_gen() blinding reset and confirm that the blinding is consistent. */
     secp256k1_scalar_t b;
     secp256k1_gej_t initial;
-    secp256k1_ecmult_gen_blind(&ctx->ecmult_gen_ctx, 0);
-    b = ctx->ecmult_gen_ctx.blind;
-    initial = ctx->ecmult_gen_ctx.initial;
-    secp256k1_ecmult_gen_blind(&ctx->ecmult_gen_ctx, 0);
-    CHECK(secp256k1_scalar_eq(&b, &ctx->ecmult_gen_ctx.blind));
-    CHECK(gej_xyz_equals_gej(&initial, &ctx->ecmult_gen_ctx.initial));
+    secp256k1_ecmult_gen_blind(&ctx->ecmult_gen_ctx, &ctx->ecmult_gen_ctx.blind, 0);
+    b = ctx->ecmult_gen_ctx.blind.val;
+    initial = ctx->ecmult_gen_ctx.blind.initial;
+    secp256k1_ecmult_gen_blind(&ctx->ecmult_gen_ctx, &ctx->ecmult_gen_ctx.blind, 0);
+    CHECK(secp256k1_scalar_eq(&b, &ctx->ecmult_gen_ctx.blind.val));
+    CHECK(gej_xyz_equals_gej(&initial, &ctx->ecmult_gen_ctx.blind.initial));
 }
 
 void run_ecmult_gen_blind(void) {
@@ -1405,7 +1405,7 @@ void test_ecdsa_sign_verify(void) {
     int getrec;
     random_scalar_order_test(&msg);
     random_scalar_order_test(&key);
-    secp256k1_ecmult_gen(&ctx->ecmult_gen_ctx, &pubj, &key);
+    secp256k1_ecmult_gen(&ctx->ecmult_gen_ctx, &ctx->ecmult_gen_ctx.blind, &pubj, &key);
     secp256k1_ge_set_gej(&pub, &pubj);
     getrec = secp256k1_rand32()&1;
     random_sign(&sig, &key, &msg, getrec?&recid:NULL);
@@ -1817,7 +1817,7 @@ void test_ecdsa_edge_cases(void) {
         secp256k1_scalar_negate(&sig.s, &sig.s);
         secp256k1_scalar_inverse(&sig.s, &sig.s);
         secp256k1_scalar_set_int(&sig.r, 1);
-        secp256k1_ecmult_gen(&ctx->ecmult_gen_ctx, &keyj, &sig.r);
+        secp256k1_ecmult_gen(&ctx->ecmult_gen_ctx, &ctx->ecmult_gen_ctx.blind, &keyj, &sig.r);
         secp256k1_ge_set_gej(&key, &keyj);
         msg = sig.s;
         CHECK(secp256k1_ecdsa_sig_verify(&ctx->ecmult_ctx, &sig, &key, &msg) == 0);
@@ -2026,7 +2026,7 @@ void test_ecdsa_openssl(void) {
     secp256k1_rand256_test(message);
     secp256k1_scalar_set_b32(&msg, message, NULL);
     random_scalar_order_test(&key);
-    secp256k1_ecmult_gen(&ctx->ecmult_gen_ctx, &qj, &key);
+    secp256k1_ecmult_gen(&ctx->ecmult_gen_ctx, &ctx->ecmult_gen_ctx.blind, &qj, &key);
     secp256k1_ge_set_gej(&q, &qj);
     ec_key = get_openssl_key(&key);
     CHECK(ec_key);
