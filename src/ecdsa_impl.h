@@ -219,14 +219,14 @@ static int secp256k1_ecdsa_sig_recover(const secp256k1_ecmult_context_t *ctx, co
     return !secp256k1_gej_is_infinity(&qj);
 }
 
-static int secp256k1_ecdsa_sig_sign(const secp256k1_ecmult_gen_context_t *ctx, secp256k1_ecdsa_sig_t *sig, const secp256k1_scalar_t *seckey, const secp256k1_scalar_t *message, const secp256k1_scalar_t *nonce, int *recid) {
+static int secp256k1_ecdsa_sig_sign(const secp256k1_ecmult_gen_context_t *ctx, const secp256k1_blind_t* blind, secp256k1_ecdsa_sig_t *sig, const secp256k1_scalar_t *seckey, const secp256k1_scalar_t *message, const secp256k1_scalar_t *nonce, int *recid) {
     unsigned char b[32];
     secp256k1_gej_t rp;
     secp256k1_ge_t r;
     secp256k1_scalar_t n;
     int overflow = 0;
 
-    secp256k1_ecmult_gen(ctx, &ctx->blind, &rp, nonce);
+    secp256k1_ecmult_gen(ctx, blind, &rp, nonce);
     secp256k1_ge_set_gej(&r, &rp);
     secp256k1_fe_normalize(&r.x);
     secp256k1_fe_normalize(&r.y);

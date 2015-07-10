@@ -10,10 +10,10 @@
 #include "scalar.h"
 #include "group.h"
 
-typedef struct {
+struct secp256k1_blind_struct {
      secp256k1_scalar_t val;
      secp256k1_gej_t initial;
-} secp256k1_ecmult_gen_blind_t;
+};
 
 typedef struct {
     /* For accelerating the computation of a*G:
@@ -29,7 +29,6 @@ typedef struct {
      * the intermediate sums while computing a*G.
      */
     secp256k1_ge_storage_t (*prec)[64][16]; /* prec[j][i] = 16^j * i * G + U_i */
-    secp256k1_ecmult_gen_blind_t blind;
 } secp256k1_ecmult_gen_context_t;
 
 static void secp256k1_ecmult_gen_context_init(secp256k1_ecmult_gen_context_t* ctx);
@@ -40,8 +39,8 @@ static void secp256k1_ecmult_gen_context_clear(secp256k1_ecmult_gen_context_t* c
 static int secp256k1_ecmult_gen_context_is_built(const secp256k1_ecmult_gen_context_t* ctx);
 
 /** Multiply with the generator: R = a*G */
-static void secp256k1_ecmult_gen(const secp256k1_ecmult_gen_context_t* ctx, const secp256k1_ecmult_gen_blind_t* blind, secp256k1_gej_t *r, const secp256k1_scalar_t *a);
+static void secp256k1_ecmult_gen(const secp256k1_ecmult_gen_context_t* ctx, const secp256k1_blind_t* blind, secp256k1_gej_t *r, const secp256k1_scalar_t *a);
 
-static void secp256k1_ecmult_gen_blind(const secp256k1_ecmult_gen_context_t* ctx, secp256k1_ecmult_gen_blind_t* blind, const unsigned char *seed32);
+static void secp256k1_ecmult_gen_blind(const secp256k1_ecmult_gen_context_t* ctx, secp256k1_blind_t* blind, const unsigned char *seed32);
 
 #endif

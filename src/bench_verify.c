@@ -13,6 +13,7 @@
 
 typedef struct {
     secp256k1_context_t *ctx;
+    secp256k1_blind_t *blind;
     unsigned char msg[32];
     unsigned char key[32];
     unsigned char sig[72];
@@ -39,18 +40,19 @@ static void benchmark_verify(void* arg) {
 int main(void) {
     int i;
     benchmark_verify_t data;
-
     data.ctx = secp256k1_context_create(SECP256K1_CONTEXT_SIGN | SECP256K1_CONTEXT_VERIFY);
+    data.blind = secp256k1_blind_create();
 
     for (i = 0; i < 32; i++) data.msg[i] = 1 + i;
     for (i = 0; i < 32; i++) data.key[i] = 33 + i;
     data.siglen = 72;
-    secp256k1_ecdsa_sign(data.ctx, data.msg, data.sig, &data.siglen, data.key, NULL, NULL);
+    secp256k1_ecdsa_sign(data.ctx, data.blind, data.msg, data.sig, &data.siglen, data.key, NULL, NULL);
     data.pubkeylen = 33;
-    CHECK(secp256k1_ec_pubkey_create(data.ctx, data.pubkey, &data.pubkeylen, data.key, 1));
+    CHECK(secp256k1_ec_pubkey_create(data.ctx, data.blind, data.pubkey, &data.pubkeylen, data.key, 1));
 
     run_benchmark("ecdsa_verify", benchmark_verify, NULL, NULL, &data, 10, 20000);
 
     secp256k1_context_destroy(data.ctx);
+    secp256k1_blind_destroy(data.blind);
     return 0;
 }

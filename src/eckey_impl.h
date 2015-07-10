@@ -94,11 +94,11 @@ static int secp256k1_eckey_privkey_parse(secp256k1_scalar_t *key, const unsigned
     return !overflow;
 }
 
-static int secp256k1_eckey_privkey_serialize(const secp256k1_ecmult_gen_context_t *ctx, unsigned char *privkey, int *privkeylen, const secp256k1_scalar_t *key, int compressed) {
+static int secp256k1_eckey_privkey_serialize(const secp256k1_ecmult_gen_context_t *ctx, const secp256k1_blind_t* blind, unsigned char *privkey, int *privkeylen, const secp256k1_scalar_t *key, int compressed) {
     secp256k1_gej_t rp;
     secp256k1_ge_t r;
     int pubkeylen = 0;
-    secp256k1_ecmult_gen(ctx, &ctx->blind, &rp, key);
+    secp256k1_ecmult_gen(ctx, blind, &rp, key);
     secp256k1_ge_set_gej(&r, &rp);
     if (compressed) {
         static const unsigned char begin[] = {

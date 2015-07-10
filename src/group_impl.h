@@ -315,7 +315,8 @@ static void secp256k1_gej_add_var(secp256k1_gej_t *r, const secp256k1_gej_t *a, 
         if (rzr) {
             secp256k1_fe_set_int(rzr, 1);
         }
-        *r = *a;
+        if(r != a)
+            *r = *a;
         return;
     }
 

@@ -82,7 +82,6 @@ static void secp256k1_ecmult_gen_context_build(secp256k1_ecmult_gen_context_t *c
 #else
     ctx->prec = (secp256k1_ge_storage_t (*)[64][16])secp256k1_ecmult_static_context;
 #endif
-    secp256k1_ecmult_gen_blind(ctx, &ctx->blind, NULL);
 }
 
 static int secp256k1_ecmult_gen_context_is_built(const secp256k1_ecmult_gen_context_t* ctx) {
@@ -100,8 +99,6 @@ static void secp256k1_ecmult_gen_context_clone(secp256k1_ecmult_gen_context_t *d
 #else
         dst->prec = src->prec;
 #endif
-        dst->blind.initial = src->blind.initial;
-        dst->blind.val = src->blind.val;
     }
 }
 
@@ -109,12 +106,30 @@ static void secp256k1_ecmult_gen_context_clear(secp256k1_ecmult_gen_context_t *c
 #ifndef USE_ECMULT_STATIC_CONTEXT
     free(ctx->prec);
 #endif
-    secp256k1_scalar_clear(&ctx->blind.val);
-    secp256k1_gej_clear(&ctx->blind.initial);
     ctx->prec = NULL;
 }
 
-static void secp256k1_ecmult_gen(const secp256k1_ecmult_gen_context_t *ctx, const secp256k1_ecmult_gen_blind_t* blind, secp256k1_gej_t *r, const secp256k1_scalar_t *gn) {
+static void secp256k1_ecmult_gen_blind_reset(secp256k1_blind_t *blind) {
+    static const secp256k1_scalar_t val =
+        SECP256K1_SCALAR_CONST(0x5af8b2fdUL, 0x7605b8faUL, 0x5880e8a6UL, 0x112ac2e2UL,
+                               0xa115bff9UL, 0xf226198bUL, 0x655a9170UL, 0xfe69bf6eUL);
+
+    static const secp256k1_gej_t initial =
+        SECP256K1_GEJ_CONST(0x6204c2f4UL, 0x2a9522faUL, 0x9f73341cUL, 0xc8b2716cUL,
+                            0x9d626ef3UL, 0x4517e9c0UL, 0xd4b060d0UL, 0x5d5cedf9UL,
+                            0x2915b99fUL, 0xfa92a98aUL, 0x3d7dbc5bUL, 0xd17ad0abUL,
+                            0x17c44958UL, 0xc47c1d1eUL, 0xcd6e2a5cUL, 0xf513f188UL);
+
+    blind->initial = initial;
+    blind->val = val;
+}
+
+static void secp256k1_ecmult_gen_blind_clear(secp256k1_blind_t *blind) {
+     secp256k1_scalar_clear(&blind->val);
+     secp256k1_gej_clear(&blind->initial);
+}
+
+static void secp256k1_ecmult_gen(const secp256k1_ecmult_gen_context_t *ctx, const secp256k1_blind_t* blind, secp256k1_gej_t *r, const secp256k1_scalar_t *gn) {
     secp256k1_ge_t add;
     secp256k1_ge_storage_t adds;
     secp256k1_scalar_t gnb;
@@ -149,7 +164,7 @@ static void secp256k1_ecmult_gen(const secp256k1_ecmult_gen_context_t *ctx, cons
 }
 
 /* Setup blinding values for secp256k1_ecmult_gen. */
-static void secp256k1_ecmult_gen_blind(const secp256k1_ecmult_gen_context_t* ctx, secp256k1_ecmult_gen_blind_t* blind, const unsigned char *seed32) {
+static void secp256k1_ecmult_gen_blind(const secp256k1_ecmult_gen_context_t* ctx, secp256k1_blind_t* blind, const unsigned char *seed32) {
     secp256k1_scalar_t b;
     secp256k1_gej_t gb;
     secp256k1_fe_t s;
@@ -163,7 +178,7 @@ static void secp256k1_ecmult_gen_blind(const secp256k1_ecmult_gen_context_t* ctx
         secp256k1_scalar_set_int(&blind->val, 1);
     }
     /* The prior blinding value (if not reset) is chained forward by including it in the hash. */
-    secp256k1_scalar_get_b32(nonce32, &ctx->blind.val);
+    secp256k1_scalar_get_b32(nonce32, &blind->val);
     /** Using a CSPRNG allows a failure free interface, avoids needing large amounts of random data,
      *   and guards against weak or adversarial seeds.  This is a simpler and safer interface than
      *   asking the caller for blinding values directly and expecting them to retry on failure.
@@ -186,7 +201,7 @@ static void secp256k1_ecmult_gen_blind(const secp256k1_ecmult_gen_context_t* ctx
     } while (retry);
     secp256k1_rfc6979_hmac_sha256_finalize(&rng);
     memset(nonce32, 0, 32);
-    secp256k1_ecmult_gen(ctx, &ctx->blind, &gb, &b);
+    secp256k1_ecmult_gen(ctx, blind, &gb, &b);
     secp256k1_scalar_negate(&b, &b);
     blind->val = b;
     blind->initial = gb;

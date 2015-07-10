@@ -46,6 +46,7 @@ extern "C" {
  *  run simultaneously.
  */
 typedef struct secp256k1_context_struct secp256k1_context_t;
+typedef struct secp256k1_blind_struct secp256k1_blind_t;
 
 /** Flags to pass to secp256k1_context_create. */
 # define SECP256K1_CONTEXT_VERIFY (1 << 0)
@@ -57,6 +58,13 @@ typedef struct secp256k1_context_struct secp256k1_context_t;
  */
 secp256k1_context_t* secp256k1_context_create(
   int flags
+) SECP256K1_WARN_UNUSED_RESULT;
+
+/** Create a secp256k1 blinding object.
+ *  Returns: a newly created blinding object.
+ *  In:      ctx: valid context
+ */
+secp256k1_blind_t* secp256k1_blind_create(
 ) SECP256K1_WARN_UNUSED_RESULT;
 
 /** Copies a secp256k1 context object.
@@ -72,6 +80,13 @@ secp256k1_context_t* secp256k1_context_clone(
  */
 void secp256k1_context_destroy(
   secp256k1_context_t* ctx
+) SECP256K1_ARG_NONNULL(1);
+
+/** Destroy a secp256k1 blinding object.
+ *  The blinding pointer may not be used afterwards.
+ */
+void secp256k1_blind_destroy(
+  secp256k1_blind_t* blind
 ) SECP256K1_ARG_NONNULL(1);
 
 /** Verify an ECDSA signature.
@@ -166,6 +181,7 @@ extern const secp256k1_nonce_function_t secp256k1_nonce_function_default;
  */
 int secp256k1_ecdsa_sign(
   const secp256k1_context_t* ctx,
+  const secp256k1_blind_t* blind,
   const unsigned char *msg32,
   unsigned char *sig,
   int *siglen,
@@ -188,6 +204,7 @@ int secp256k1_ecdsa_sign(
  */
 int secp256k1_ecdsa_sign_compact(
   const secp256k1_context_t* ctx,
+  const secp256k1_blind_t* blind,
   const unsigned char *msg32,
   unsigned char *sig64,
   const unsigned char *seckey,
@@ -254,6 +271,7 @@ SECP256K1_WARN_UNUSED_RESULT int secp256k1_ec_pubkey_verify(
  */
 SECP256K1_WARN_UNUSED_RESULT int secp256k1_ec_pubkey_create(
   const secp256k1_context_t* ctx,
+  const secp256k1_blind_t* blind,
   unsigned char *pubkey,
   int *pubkeylen,
   const unsigned char *seckey,
@@ -280,6 +298,7 @@ SECP256K1_WARN_UNUSED_RESULT int secp256k1_ec_pubkey_decompress(
  */
 SECP256K1_WARN_UNUSED_RESULT int secp256k1_ec_privkey_export(
   const secp256k1_context_t* ctx,
+  const secp256k1_blind_t* blind,
   const unsigned char *seckey,
   unsigned char *privkey,
   int *privkeylen,
@@ -328,17 +347,17 @@ SECP256K1_WARN_UNUSED_RESULT int secp256k1_ec_pubkey_tweak_mul(
   const unsigned char *tweak
 ) SECP256K1_ARG_NONNULL(1) SECP256K1_ARG_NONNULL(2) SECP256K1_ARG_NONNULL(4);
 
-/** Updates the context randomization.
+/** Updates the blind randomization.
  *  Returns: 1: randomization successfully updated
  *           0: error
- *  In:      ctx:       pointer to a context object (cannot be NULL)
+ *  In:      ctx:       pointer to a blind object (cannot be NULL)
  *           seed32:    pointer to a 32-byte random seed (NULL resets to initial state)
  */
-SECP256K1_WARN_UNUSED_RESULT int secp256k1_context_randomize(
-  secp256k1_context_t* ctx,
+SECP256K1_WARN_UNUSED_RESULT int secp256k1_blind_randomize(
+  const secp256k1_context_t* ctx,
+  secp256k1_blind_t* blind,
   const unsigned char *seed32
 ) SECP256K1_ARG_NONNULL(1);
-
 
 # ifdef __cplusplus
 }
