@@ -8,7 +8,7 @@ compiler:
   - gcc
 env:
   global:
-    - FIELD=auto  BIGNUM=auto  SCALAR=auto  ENDOMORPHISM=no  STATICPRECOMPUTATION=no ASM=no  BUILD=check  EXTRAFLAGS= HOST=
+    - FIELD=auto  BIGNUM=auto  SCALAR=auto  ENDOMORPHISM=no  STATICPRECOMPUTATION=no ASM=no  BUILD=check  EXTRAFLAGS= HOST= SCHNORR=no
   matrix:
     - SCALAR=32bit
     - SCALAR=64bit
@@ -16,10 +16,10 @@ env:
     - FIELD=64bit     ENDOMORPHISM=yes
     - FIELD=64bit                       ASM=x86_64
     - FIELD=64bit     ENDOMORPHISM=yes  ASM=x86_64
-    - FIELD=32bit
+    - FIELD=32bit     SCHNORR=yes
     - FIELD=32bit     ENDOMORPHISM=yes
     - BIGNUM=no
-    - BIGNUM=no       ENDOMORPHISM=yes
+    - BIGNUM=no       ENDOMORPHISM=yes SCHNORR=yes
     - BIGNUM=no       STATICPRECOMPUTATION=no
     - BUILD=distcheck
     - EXTRAFLAGS=CFLAGS=-DDETERMINISTIC

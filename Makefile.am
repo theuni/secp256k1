@@ -95,3 +95,7 @@ CLEANFILES = gen_context src/ecmult_static_context.h
 endif
 
 EXTRA_DIST = autogen.sh src/gen_context.c src/basic-config.h
+
+if ENABLE_MODULE_SCHNORR
+include src/modules/schnorr/Makefile.am.include
+endif
