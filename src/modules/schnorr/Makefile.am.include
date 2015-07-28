@@ -8,4 +8,5 @@ noinst_PROGRAMS += bench_schnorr_verify
 bench_schnorr_verify_SOURCES = src/bench_schnorr_verify.c
 bench_schnorr_verify_LDADD = libsecp256k1.la $(SECP_LIBS)
 bench_schnorr_verify_LDFLAGS = -static
+bench_schnorr_verify_CPPFLAGS = $(SECP_DEFINES)
 endif

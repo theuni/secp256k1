@@ -1,5 +1,7 @@
 ACLOCAL_AMFLAGS = -I build-aux/m4
 
+SECP_DEFINES = -DSECP256K1_INTERNAL
+
 lib_LTLIBRARIES = libsecp256k1.la
 include_HEADERS = include/secp256k1.h include/secp256k1-cfg.h
 noinst_HEADERS =
@@ -43,7 +45,7 @@ pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = libsecp256k1.pc
 
 libsecp256k1_la_SOURCES = src/secp256k1.c
-libsecp256k1_la_CPPFLAGS = -I$(top_srcdir)/include -I$(top_srcdir)/src $(SECP_INCLUDES)
+libsecp256k1_la_CPPFLAGS = -I$(top_srcdir)/include -I$(top_srcdir)/src $(SECP_INCLUDES) $(SECP_DEFINES)
 libsecp256k1_la_LIBADD = $(SECP_LIBS)
 
 
@@ -62,13 +64,13 @@ bench_sign_LDFLAGS = -static
 bench_internal_SOURCES = src/bench_internal.c
 bench_internal_LDADD = $(SECP_LIBS)
 bench_internal_LDFLAGS = -static
-bench_internal_CPPFLAGS = $(SECP_INCLUDES)
+bench_internal_CPPFLAGS = $(SECP_INCLUDES) $(SECP_DEFINES)
 endif
 
 if USE_TESTS
 noinst_PROGRAMS += tests
 tests_SOURCES = src/tests.c
-tests_CPPFLAGS = -DVERIFY -I$(top_srcdir)/src $(SECP_INCLUDES) $(SECP_TEST_INCLUDES)
+tests_CPPFLAGS = -DVERIFY -I$(top_srcdir)/src $(SECP_INCLUDES) $(SECP_TEST_INCLUDES) $(SECP_DEFINES)
 tests_LDADD = $(SECP_LIBS) $(SECP_TEST_LIBS)
 tests_LDFLAGS = -static
 TESTS = tests
