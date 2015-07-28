@@ -335,7 +335,7 @@ AC_MSG_NOTICE([Using endomorphism optimizations: $use_endomorphism])
 AC_MSG_NOTICE([Building Schnorr signatures module: $enable_module_schnorr])
 
 AC_CONFIG_HEADERS([src/libsecp256k1-config.h])
-AC_CONFIG_FILES([Makefile libsecp256k1.pc])
+AC_CONFIG_FILES([Makefile include/secp256k1-cfg.h libsecp256k1.pc])
 AC_SUBST(SECP_INCLUDES)
 AC_SUBST(SECP_LIBS)
 AC_SUBST(SECP_TEST_LIBS)

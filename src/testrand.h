@@ -7,9 +7,7 @@
 #ifndef _SECP256K1_TESTRAND_H_
 #define _SECP256K1_TESTRAND_H_
 
-#if defined HAVE_CONFIG_H
-#include "libsecp256k1-config.h"
-#endif
+#include "include/secp256k1-cfg.h"
 
 /* A non-cryptographic RNG used only for test infrastructure. */
 

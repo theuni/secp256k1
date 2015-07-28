@@ -7,11 +7,9 @@
 #ifndef _SECP256K1_SCALAR_
 #define _SECP256K1_SCALAR_
 
-#include "num.h"
+#include "include/secp256k1-cfg.h"
 
-#if defined HAVE_CONFIG_H
-#include "libsecp256k1-config.h"
-#endif
+#include "num.h"
 
 #if defined(USE_SCALAR_4X64)
 #include "scalar_4x64.h"
