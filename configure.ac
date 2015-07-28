@@ -238,7 +238,7 @@ fi
 # select assembly optimization
 case $set_asm in
 x86_64)
-  AC_DEFINE(USE_ASM_X86_64, 1, [Define this symbol to enable x86_64 assembly optimizations])
+  use_asm_x86_64=yes
   ;;
 no)
   ;;
@@ -250,10 +250,10 @@ esac
 # select field implementation
 case $set_field in
 64bit)
-  AC_DEFINE(USE_FIELD_5X52, 1, [Define this symbol to use the FIELD_5X52 implementation])
+  use_field_5x52=yes
   ;;
 32bit)
-  AC_DEFINE(USE_FIELD_10X26, 1, [Define this symbol to use the FIELD_10X26 implementation])
+  use_field_10x26=yes
   ;;
 *)
   AC_MSG_ERROR([invalid field implementation])
@@ -263,15 +263,15 @@ esac
 # select bignum implementation
 case $set_bignum in
 gmp)
+  use_num_gmp=yes
+  use_field_inv_num=yes
+  use_scalar_inv_num=yes
   AC_DEFINE(HAVE_LIBGMP, 1, [Define this symbol if libgmp is installed])
-  AC_DEFINE(USE_NUM_GMP, 1, [Define this symbol to use the gmp implementation for num])
-  AC_DEFINE(USE_FIELD_INV_NUM, 1, [Define this symbol to use the num-based field inverse implementation])
-  AC_DEFINE(USE_SCALAR_INV_NUM, 1, [Define this symbol to use the num-based scalar inverse implementation])
   ;;
 no)
-  AC_DEFINE(USE_NUM_NONE, 1, [Define this symbol to use no num implementation])
-  AC_DEFINE(USE_FIELD_INV_BUILTIN, 1, [Define this symbol to use the native field inverse implementation])
-  AC_DEFINE(USE_SCALAR_INV_BUILTIN, 1, [Define this symbol to use the native scalar inverse implementation])
+  use_num_none=yes
+  use_field_inv_builtin=yes
+  use_scalar_inv_builtin=yes
   ;;
 *)
   AC_MSG_ERROR([invalid bignum implementation])
@@ -281,10 +281,10 @@ esac
 #select scalar implementation
 case $set_scalar in
 64bit)
-  AC_DEFINE(USE_SCALAR_4X64, 1, [Define this symbol to use the 4x64 scalar implementation])
+  use_scalar_4x64=yes
   ;;
 32bit)
-  AC_DEFINE(USE_SCALAR_8X32, 1, [Define this symbol to use the 8x32 scalar implementation])
+  use_scalar_8x32=yes
   ;;
 *)
   AC_MSG_ERROR([invalid scalar implementation])
@@ -312,17 +312,20 @@ if test x"$set_bignum" = x"gmp"; then
   SECP_INCLUDES="$SECP_INCLUDES $GMP_CPPFLAGS"
 fi
 
-if test x"$use_endomorphism" = x"yes"; then
-  AC_DEFINE(USE_ENDOMORPHISM, 1, [Define this symbol to use endomorphism optimization])
-fi
-
-if test x"$use_ecmult_static_precomputation" = x"yes"; then
-  AC_DEFINE(USE_ECMULT_STATIC_PRECOMPUTATION, 1, [Define this symbol to use a statically generated ecmult table])
-fi
-
-if test x"$enable_module_schnorr" = x"yes"; then
-  AC_DEFINE(ENABLE_MODULE_SCHNORR, 1, [Define this symbol to enable the Schnorr signature module])
-fi
+AC_SUBST(USE_ASM_X86_64,`expr x"$use_asm_x86_64" = x"yes"`)
+AC_SUBST(USE_FIELD_5X52,`expr x"$use_field_5x52" = x"yes"`)
+AC_SUBST(USE_FIELD_10X26,`expr x"$use_field_10x26" = x"yes"`)
+AC_SUBST(USE_NUM_GMP,`expr x"$use_num_gmp" = x"yes"`)
+AC_SUBST(USE_FIELD_INV_NUM,`expr x"$use_field_inv_num" = x"yes"`)
+AC_SUBST(USE_SCALAR_INV_NUM,`expr x"$use_scalar_inv_num" = x"yes"`)
+AC_SUBST(USE_NUM_NONE,`expr x"$use_num_none" = x"yes"`)
+AC_SUBST(USE_FIELD_INV_BUILTIN,`expr x"$use_field_inv_builtin" = x"yes"`)
+AC_SUBST(USE_SCALAR_INV_BUILTIN,`expr x"$use_scalar_inv_builtin" = x"yes"`)
+AC_SUBST(USE_SCALAR_4X64,`expr x"$use_scalar_4x64" = x"yes"`)
+AC_SUBST(USE_SCALAR_8X32,`expr x"$use_scalar_8x32" = x"yes"`)
+AC_SUBST(USE_ENDOMORPHISM,`expr x"$use_endomorphism" = x"yes"`)
+AC_SUBST(USE_ECMULT_STATIC_PRECOMPUTATION,`expr x"$use_ecmult_static_precomputation" = x"yes"`)
+AC_SUBST(ENABLE_MODULE_SCHNORR,`expr x"$enable_module_schnorr" = x"yes"`)
 
 AC_C_BIGENDIAN()
 
