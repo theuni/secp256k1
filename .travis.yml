@@ -1,4 +1,7 @@
 language: c
+os:
+  - linux
+  - osx
 sudo: false
 addons:
   apt:
@@ -29,6 +32,7 @@ matrix:
   fast_finish: true
   include:
     - compiler: clang
+      os: linux
       env: HOST=i686-linux-gnu ENDOMORPHISM=yes
       addons:
         apt:
@@ -36,24 +40,36 @@ matrix:
             - gcc-multilib
             - libgmp-dev:i386
     - compiler: clang
+      os: linux
       env: HOST=i686-linux-gnu
       addons:
         apt:
           packages:
             - gcc-multilib
     - compiler: gcc
+      os: linux
       env: HOST=i686-linux-gnu ENDOMORPHISM=yes
       addons:
         apt:
           packages:
             - gcc-multilib
     - compiler: gcc
+      os: linux
       env: HOST=i686-linux-gnu
       addons:
         apt:
           packages:
             - gcc-multilib
             - libgmp-dev:i386
+  exclude:
+    - os: osx
+      compiler: gcc
+
+before_install:
+  - if [ "x$TRAVIS_OS_NAME" = "osx" ]; then brew update; fi
+install:
+  - if [ "x$TRAVIS_OS_NAME" = "osx" ]; then brew install gmp; fi
+
 before_script: ./autogen.sh
 script:
  - if [ -n "$HOST" ]; then export USE_HOST="--host=$HOST"; fi
