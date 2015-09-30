@@ -66,7 +66,6 @@ matrix:
   exclude:
     - os: osx
       compiler: gcc
-  exclude:
     - os: linux
       compiler: clang
 before_script: ./autogen.sh
