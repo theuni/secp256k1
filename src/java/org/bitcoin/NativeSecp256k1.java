@@ -24,7 +24,7 @@ public class NativeSecp256k1 {
     /**
      * Verifies the given secp256k1 signature in native code.
      * Calling when enabled == false is undefined (probably library not loaded)
-     * 
+     *
      * @param data The data which was signed, must be exactly 32 bytes
      * @param signature The signature
      * @param pub The public key which did the signing
@@ -33,7 +33,7 @@ public class NativeSecp256k1 {
         Preconditions.checkArgument(data.length == 32 && signature.length <= 520 && pub.length <= 520);
 
         ByteBuffer byteBuff = nativeECDSABuffer.get();
-        if (byteBuff == null) {
+        if (byteBuff == null || byteBuff.capacity() < 520) {
             byteBuff = ByteBuffer.allocateDirect(520);
             byteBuff.order(ByteOrder.nativeOrder());
             nativeECDSABuffer.set(byteBuff);
@@ -56,7 +56,7 @@ public class NativeSecp256k1 {
 
     /**
      * recover the given secp256k1 pubkey in native code.
-     * 
+     *
      * @param data The data which was signed, must be exactly 32 bytes
      * @param signature The signature
      * @param compressed whether to recover a compressed pubkey
@@ -67,7 +67,7 @@ public class NativeSecp256k1 {
         Preconditions.checkArgument(data.length == 32 && signature.length == 64 && (compressed == 0 || compressed == 1));
 
         ByteBuffer byteBuff = nativeECDSABuffer.get();
-        if (byteBuff == null) {
+        if (byteBuff == null || byteBuff.capacity() < 32 + 64) {
             byteBuff = ByteBuffer.allocateDirect(32 + 64);
             byteBuff.order(ByteOrder.nativeOrder());
             nativeECDSABuffer.set(byteBuff);
@@ -90,20 +90,20 @@ public class NativeSecp256k1 {
     }
 
     /**
-     * libsecp256k1 Create an ECDSA signature. 
-     * 
+     * libsecp256k1 Create an ECDSA signature.
+     *
      * @param data Message hash, 32 bytes
      * @param key Secret key, 32 bytes
-     * 
+     *
      * Return values
      * @param sig byte array of signature
      */
-    
+
     public static byte[] sign(byte[] data, byte[] sec) throws AssertFailException{
         Preconditions.checkArgument(data.length == 32 && sec.length <= 32);
 
         ByteBuffer byteBuff = nativeECDSABuffer.get();
-        if (byteBuff == null) {
+        if (byteBuff == null || byteBuff.capacity() < 32 + 32) {
             byteBuff = ByteBuffer.allocateDirect(32 + 32);
             byteBuff.order(ByteOrder.nativeOrder());
             nativeECDSABuffer.set(byteBuff);
@@ -130,19 +130,19 @@ public class NativeSecp256k1 {
         if( retVal == 0 ) sigArr = new byte[0];
 
         return sigArr;
-    } 
+    }
 
     /**
      * libsecp256k1 Seckey Verify - returns 1 if valid, 0 if invalid
-     * 
+     *
      * @param seckey ECDSA Secret key, 32 bytes
      */
-    
+
     public static boolean secKeyVerify(byte[] seckey) {
         Preconditions.checkArgument(seckey.length == 32);
 
         ByteBuffer byteBuff = nativeECDSABuffer.get();
-        if (byteBuff == null) {
+        if (byteBuff == null || byteBuff.capacity() < seckey.length) {
             byteBuff = ByteBuffer.allocateDirect(seckey.length);
             byteBuff.order(ByteOrder.nativeOrder());
             nativeECDSABuffer.set(byteBuff);
@@ -156,25 +156,25 @@ public class NativeSecp256k1 {
         } finally {
           r.unlock();
         }
-    } 
+    }
 
 
     /**
      * libsecp256k1 Compute Pubkey - computes public key from secret key
-     * 
+     *
      * @param seckey ECDSA Secret key, 32 bytes
      * @param compressed 1 to return compressed key, 0 for uncompressed
-     * 
+     *
      * Return values
      * @param pubkey ECDSA Public key, 33 or 65 bytes
      */
-    
+
     //TODO support 'compressed' arg
     public static byte[] computePubkey(byte[] seckey) throws AssertFailException{
         Preconditions.checkArgument(seckey.length == 32);
 
         ByteBuffer byteBuff = nativeECDSABuffer.get();
-        if (byteBuff == null) {
+        if (byteBuff == null || byteBuff.capacity() < seckey.length) {
             byteBuff = ByteBuffer.allocateDirect(seckey.length);
             byteBuff.order(ByteOrder.nativeOrder());
             nativeECDSABuffer.set(byteBuff);
@@ -200,7 +200,7 @@ public class NativeSecp256k1 {
         if( retVal == 0 ) pubArr = new byte[0];
 
         return pubArr;
-    } 
+    }
 
     /**
      * libsecp256k1 Cleanup - This destroys the secp256k1 context object
@@ -217,14 +217,14 @@ public class NativeSecp256k1 {
 
     /**
      * libsecp256k1 Secret Key Import - Import a secret key in DER format.
-     * 
+     *
      * @param seckey DER Sec key
      * @param compressed Compressed format
      */
     public static byte[] secKeyImport(byte[] seckey) throws AssertFailException{
 
         ByteBuffer byteBuff = nativeECDSABuffer.get();
-        if (byteBuff == null) {
+        if (byteBuff == null || byteBuff.capacity() < seckey.length) {
             byteBuff = ByteBuffer.allocateDirect(seckey.length);
             byteBuff.order(ByteOrder.nativeOrder());
             nativeECDSABuffer.set(byteBuff);
@@ -251,11 +251,11 @@ public class NativeSecp256k1 {
         assertEquals(retVal,1, "Failed return value check.");
 
         return privArr;
-    } 
+    }
 
     /**
      * libsecp256k1 Private Key Export - Export a private key in DER format.
-     * 
+     *
      * @param seckey ECDSA Sec key, 33 or 65 bytes
      * @param compressed Compressed format
      */
@@ -263,7 +263,7 @@ public class NativeSecp256k1 {
         Preconditions.checkArgument(privkey.length == 32 && (compressed == 0 || compressed == 1) );
 
         ByteBuffer byteBuff = nativeECDSABuffer.get();
-        if (byteBuff == null) {
+        if (byteBuff == null || byteBuff.capacity() < privkey.length) {
             byteBuff = ByteBuffer.allocateDirect(privkey.length);
             byteBuff.order(ByteOrder.nativeOrder());
             nativeECDSABuffer.set(byteBuff);
@@ -289,7 +289,7 @@ public class NativeSecp256k1 {
         assertEquals(retVal,1, "Failed return value check.");
 
         return privArr;
-    } 
+    }
 
     public static long cloneContext() {
        r.lock();
@@ -300,7 +300,7 @@ public class NativeSecp256k1 {
 
     /**
      * libsecp256k1 PrivKey Tweak-Mul - Tweak privkey by multiplying to it
-     * 
+     *
      * @param tweak some bytes to tweak with
      * @param seckey 32-byte seckey
      */
@@ -308,7 +308,7 @@ public class NativeSecp256k1 {
         Preconditions.checkArgument(privkey.length == 32);
 
         ByteBuffer byteBuff = nativeECDSABuffer.get();
-        if (byteBuff == null) {
+        if (byteBuff == null || byteBuff.capacity() < privkey.length + tweak.length) {
             byteBuff = ByteBuffer.allocateDirect(privkey.length + tweak.length);
             byteBuff.order(ByteOrder.nativeOrder());
             nativeECDSABuffer.set(byteBuff);
@@ -339,7 +339,7 @@ public class NativeSecp256k1 {
 
     /**
      * libsecp256k1 PrivKey Tweak-Add - Tweak privkey by adding to it
-     * 
+     *
      * @param tweak some bytes to tweak with
      * @param seckey 32-byte seckey
      */
@@ -347,7 +347,7 @@ public class NativeSecp256k1 {
         Preconditions.checkArgument(privkey.length == 32);
 
         ByteBuffer byteBuff = nativeECDSABuffer.get();
-        if (byteBuff == null) {
+        if (byteBuff == null || byteBuff.capacity() < privkey.length + tweak.length) {
             byteBuff = ByteBuffer.allocateDirect(privkey.length + tweak.length);
             byteBuff.order(ByteOrder.nativeOrder());
             nativeECDSABuffer.set(byteBuff);
@@ -378,7 +378,7 @@ public class NativeSecp256k1 {
 
     /**
      * libsecp256k1 PubKey Tweak-Add - Tweak pubkey by adding to it
-     * 
+     *
      * @param tweak some bytes to tweak with
      * @param pubkey 32-byte seckey
      */
@@ -386,7 +386,7 @@ public class NativeSecp256k1 {
         Preconditions.checkArgument(pubkey.length == 33 || pubkey.length == 65);
 
         ByteBuffer byteBuff = nativeECDSABuffer.get();
-        if (byteBuff == null) {
+        if (byteBuff == null || byteBuff.capacity() < pubkey.length + tweak.length) {
             byteBuff = ByteBuffer.allocateDirect(pubkey.length + tweak.length);
             byteBuff.order(ByteOrder.nativeOrder());
             nativeECDSABuffer.set(byteBuff);
@@ -417,7 +417,7 @@ public class NativeSecp256k1 {
 
     /**
      * libsecp256k1 PubKey Tweak-Mul - Tweak pubkey by multiplying to it
-     * 
+     *
      * @param tweak some bytes to tweak with
      * @param pubkey 32-byte seckey
      */
@@ -425,7 +425,7 @@ public class NativeSecp256k1 {
         Preconditions.checkArgument(pubkey.length == 33 || pubkey.length == 65);
 
         ByteBuffer byteBuff = nativeECDSABuffer.get();
-        if (byteBuff == null) {
+        if (byteBuff == null || byteBuff.capacity() < pubkey.length + tweak.length) {
             byteBuff = ByteBuffer.allocateDirect(pubkey.length + tweak.length);
             byteBuff.order(ByteOrder.nativeOrder());
             nativeECDSABuffer.set(byteBuff);
@@ -456,7 +456,7 @@ public class NativeSecp256k1 {
 
     /**
      * libsecp256k1 create ECDH secret - constant time ECDH calculation
-     * 
+     *
      * @param seckey byte array of secret key used in exponentiaion
      * @param pubkey byte array of public key used in exponentiaion
      */
@@ -466,7 +466,7 @@ public class NativeSecp256k1 {
         Preconditions.checkArgument(msg32.length == 32);
 
         ByteBuffer byteBuff = nativeECDSABuffer.get();
-        if (byteBuff == null) {
+        if (byteBuff == null || byteBuff.capacity() < pubkeys.length * 65) {
             byteBuff = ByteBuffer.allocateDirect(pubkeys.length * 65);
             byteBuff.order(ByteOrder.nativeOrder());
             nativeECDSABuffer.set(byteBuff);
@@ -497,7 +497,7 @@ public class NativeSecp256k1 {
 
     /**
      * libsecp256k1 create ECDH secret - constant time ECDH calculation
-     * 
+     *
      * @param seckey byte array of secret key used in exponentiaion
      * @param pubkey byte array of public key used in exponentiaion
      */
@@ -507,7 +507,7 @@ public class NativeSecp256k1 {
         Preconditions.checkArgument(msg32.length == 32);
 
         ByteBuffer byteBuff = nativeECDSABuffer.get();
-        if (byteBuff == null) {
+        if (byteBuff == null || byteBuff.capacity() < pubkeys.length * 65) {
             byteBuff = ByteBuffer.allocateDirect(pubkeys.length * 65);
             byteBuff.order(ByteOrder.nativeOrder());
             nativeECDSABuffer.set(byteBuff);
@@ -539,9 +539,9 @@ public class NativeSecp256k1 {
 
     /**
      * libsecp256k1 createRecoverableSig - create recoverable signature
-     * 
+     *
      * @param seckey byte array of secret key used in signing
-     * @param msg32 32-byte signed message hash 
+     * @param msg32 32-byte signed message hash
      */
     //TODO createRecoverableSig()
     public static byte[] createRecoverableSig(byte[] pubkey, byte[] msg32) throws AssertFailException{
@@ -549,7 +549,7 @@ public class NativeSecp256k1 {
         Preconditions.checkArgument(msg32.length == 32);
 
         ByteBuffer byteBuff = nativeECDSABuffer.get();
-        if (byteBuff == null) {
+        if (byteBuff == null || byteBuff.capacity() < pubkeys.length * 65) {
             byteBuff = ByteBuffer.allocateDirect(pubkeys.length * 65);
             byteBuff.order(ByteOrder.nativeOrder());
             nativeECDSABuffer.set(byteBuff);
@@ -581,9 +581,9 @@ public class NativeSecp256k1 {
 
     /**
      * libsecp256k1 Recover pubkey - recover pubkey from signature
-     * 
+     *
      * @param sig byte array of signature
-     * @param msg32 32-byte signed message hash 
+     * @param msg32 32-byte signed message hash
      */
     //TODO recoverPubkey()
     public static byte[] recoverPubkey(byte[] pubkey, byte[] msg32) throws AssertFailException{
@@ -594,7 +594,7 @@ public class NativeSecp256k1 {
         Preconditions.checkArgument(msg32.length == 32);
 
         ByteBuffer byteBuff = nativeECDSABuffer.get();
-        if (byteBuff == null) {
+        if (byteBuff == null || byteBuff.capacity() < pubkeys.length * 65) {
             byteBuff = ByteBuffer.allocateDirect(pubkeys.length * 65);
             byteBuff.order(ByteOrder.nativeOrder());
             nativeECDSABuffer.set(byteBuff);
@@ -625,7 +625,7 @@ public class NativeSecp256k1 {
 
     /**
      * libsecp256k1 PubKey combine - add pubkeys together
-     * 
+     *
      * @param pubkeys byte array of pubkeys
      * @param numKeys number of pubkeys to add
      */
@@ -636,7 +636,7 @@ public class NativeSecp256k1 {
         for(int i = 0; i < pubkeys.length; i++) Preconditions.checkArgument(pubkeys[i].length == 65 || pubkeys[i].length == 33);
 
         ByteBuffer byteBuff = nativeECDSABuffer.get();
-        if (byteBuff == null) {
+        if (byteBuff == null || byteBuff.capacity() < pubkeys.length * 65) {
             byteBuff = ByteBuffer.allocateDirect(pubkeys.length * 65);
             byteBuff.order(ByteOrder.nativeOrder());
             nativeECDSABuffer.set(byteBuff);
@@ -668,14 +668,14 @@ public class NativeSecp256k1 {
 
     /**
      * libsecp256k1 randomize - updates the context randomization
-     * 
+     *
      * @param seed 32-byte random seed
      */
     public static synchronized boolean randomize(byte[] seed) throws AssertFailException{
         Preconditions.checkArgument(seed.length == 32 || seed == null);
 
         ByteBuffer byteBuff = nativeECDSABuffer.get();
-        if (byteBuff == null) {
+        if (byteBuff == null || byteBuff.capacity() < seed.length) {
             byteBuff = ByteBuffer.allocateDirect(seed.length);
             byteBuff.order(ByteOrder.nativeOrder());
             nativeECDSABuffer.set(byteBuff);
