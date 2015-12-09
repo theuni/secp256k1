@@ -501,40 +501,34 @@ public class NativeSecp256k1 {
      * @param seckey byte array of secret key used in exponentiaion
      * @param pubkey byte array of public key used in exponentiaion
      */
-    //TODO createECDHSecret()
-    public static byte[] createECDHSecret(byte[] pubkey, byte[] msg32) throws AssertFailException{
-/*
-        Preconditions.checkArgument(msg32.length == 32);
+    public static byte[] createECDHSecret(byte[] seckey, byte[] pubkey) throws AssertFailException{
+        Preconditions.checkArgument(seckey.length <= 32 && pubkey.length <= 65);
 
         ByteBuffer byteBuff = nativeECDSABuffer.get();
-        if (byteBuff == null || byteBuff.capacity() < pubkeys.length * 65) {
-            byteBuff = ByteBuffer.allocateDirect(pubkeys.length * 65);
+        if (byteBuff == null || byteBuff.capacity() < 32 + pubkey.length) {
+            byteBuff = ByteBuffer.allocateDirect(32 + pubkey.length);
             byteBuff.order(ByteOrder.nativeOrder());
             nativeECDSABuffer.set(byteBuff);
         }
         byteBuff.rewind();
+        byteBuff.put(seckey);
         byteBuff.put(pubkey);
 
         byte[][] retByteArray;
         r.lock();
         try {
-          retByteArray = secp256k1_ecdsa_recover(byteBuff,Secp256k1Context.getContext(), pubkey.length);
+          retByteArray = secp256k1_ecdh(byteBuff, Secp256k1Context.getContext(), pubkey.length);
         } finally {
           r.unlock();
         }
 
-        byte[] pubArr = retByteArray[0];
+        byte[] resArr = retByteArray[0];
+        int retVal = new BigInteger(new byte[] { retByteArray[1][0] }).intValue();
 
-        int pubLen = (byte) new BigInteger(new byte[] { retByteArray[1][0] }).intValue() & 0xFF;
-        int retVal = new BigInteger(new byte[] { retByteArray[1][1] }).intValue();
+        assertEquals(resArr.length, 32, "Got bad result length.");
+        assertEquals(retVal, 1, "Failed return value check.");
 
-        assertEquals(pubArr.length, pubLen, "Got bad pubkey length." );
-
-        assertEquals(retVal,1, "Failed return value check.");
-
-        return pubArr;
-*/
-  return new byte[0];
+        return resArr;
     }
 
     /**
@@ -691,6 +685,38 @@ public class NativeSecp256k1 {
         }
     }
 
+    public static byte[] schnorrSign(byte[] data, byte[] sec) throws AssertFailException {
+        Preconditions.checkArgument(data.length == 32 && sec.length <= 32);
+
+        ByteBuffer byteBuff = nativeECDSABuffer.get();
+        if (byteBuff == null) {
+            byteBuff = ByteBuffer.allocateDirect(32 + 32);
+            byteBuff.order(ByteOrder.nativeOrder());
+            nativeECDSABuffer.set(byteBuff);
+        }
+        byteBuff.rewind();
+        byteBuff.put(data);
+        byteBuff.put(sec);
+
+        byte[][] retByteArray;
+
+        r.lock();
+        try {
+          retByteArray = secp256k1_schnorr_sign(byteBuff, Secp256k1Context.getContext());
+        } finally {
+          r.unlock();
+        }
+
+        byte[] sigArr = retByteArray[0];
+        int retVal = new BigInteger(new byte[] { retByteArray[1][0] }).intValue();
+
+        assertEquals(sigArr.length, 64, "Got bad signature length." );
+
+        if( retVal == 0 ) sigArr = new byte[0];
+
+        return sigArr;
+    }
+
     private static native long secp256k1_ctx_clone(long context);
 
     private static native int secp256k1_context_randomize(ByteBuffer byteBuff, long context);
@@ -725,4 +751,9 @@ public class NativeSecp256k1 {
     private static native byte[][] secp256k1_ec_pubkey_parse(ByteBuffer byteBuff, long context, int inputLen);
 
     private static native long secp256k1_ecdsa_pubkey_combine(ByteBuffer byteBuff, long context, int keys);
+
+    private static native byte[][] secp256k1_schnorr_sign(ByteBuffer byteBuff, long context);
+
+    private static native byte[][] secp256k1_ecdh(ByteBuffer byteBuff, long context, int inputLen);
+
 }

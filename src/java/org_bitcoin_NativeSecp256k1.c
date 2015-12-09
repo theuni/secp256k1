@@ -54,10 +54,10 @@ JNIEXPORT jint JNICALL Java_org_bitcoin_NativeSecp256k1_secp256k1_1ecdsa_1verify
   secp256k1_ecdsa_signature sig;
   secp256k1_pubkey pubkey;
 
-  int ret = secp256k1_ecdsa_signature_parse_der(ctx, &sig, sigdata, siglen);  
+  int ret = secp256k1_ecdsa_signature_parse_der(ctx, &sig, sigdata, siglen);
 
   if( ret ) {
-    ret = secp256k1_ec_pubkey_parse(ctx, &pubkey, pubdata, publen);  
+    ret = secp256k1_ec_pubkey_parse(ctx, &pubkey, pubdata, publen);
   }
 
   /*Debug
@@ -410,8 +410,8 @@ JNIEXPORT jobjectArray JNICALL Java_org_bitcoin_NativeSecp256k1_secp256k1_1pubke
   unsigned char intsarray[2];
   unsigned char outputSer[65];
   size_t outputLen = 65;
-                            
-  secp256k1_pubkey pubkey;          
+
+  secp256k1_pubkey pubkey;
   int ret = secp256k1_ec_pubkey_parse(ctx, &pubkey, pkey, publen);
 
   if( ret ) {
@@ -455,7 +455,7 @@ JNIEXPORT jobjectArray JNICALL Java_org_bitcoin_NativeSecp256k1_secp256k1_1pubke
   unsigned char outputSer[65];
   size_t outputLen = 65;
 
-  secp256k1_pubkey pubkey;          
+  secp256k1_pubkey pubkey;
   int ret = secp256k1_ec_pubkey_parse(ctx, &pubkey, pkey, publen);
 
   if ( ret ) {
@@ -487,9 +487,86 @@ JNIEXPORT jobjectArray JNICALL Java_org_bitcoin_NativeSecp256k1_secp256k1_1pubke
 }
 
 JNIEXPORT jlong JNICALL Java_org_bitcoin_NativeSecp256k1_secp256k1_1ecdsa_1pubkey_1combine
-  (JNIEnv * env, jclass classObject, jobject byteBufferObject, jlong ctx_l, jint numkeys) 
+  (JNIEnv * env, jclass classObject, jobject byteBufferObject, jlong ctx_l, jint numkeys)
 {
   (void)classObject;(void)env;(void)byteBufferObject;(void)ctx_l;(void)numkeys;
 
   return 0;
+}
+
+JNIEXPORT jobjectArray JNICALL Java_org_bitcoin_NativeSecp256k1_secp256k1_1schnorr_1sign
+  (JNIEnv* env, jclass classObject, jobject byteBufferObject, jlong ctx_l)
+{
+  secp256k1_context *ctx = (secp256k1_context*)ctx_l;
+  unsigned char* data = (unsigned char*) (*env)->GetDirectBufferAddress(env, byteBufferObject);
+  unsigned char* secKey = (unsigned char*) (data + 32);
+
+  jobjectArray retArray;
+  jbyteArray sigArray, intsByteArray;
+  unsigned char intsarray[1];
+  unsigned char sig[64];
+
+  int ret = secp256k1_schnorr_sign(ctx, sig, data, secKey, NULL, NULL);
+
+  intsarray[0] = ret;
+
+  retArray = (*env)->NewObjectArray(env, 2,
+    (*env)->FindClass(env, "[B"),
+    (*env)->NewByteArray(env, 1));
+
+  sigArray = (*env)->NewByteArray(env, 64);
+  (*env)->SetByteArrayRegion(env, sigArray, 0, 64, (jbyte*)sig);
+  (*env)->SetObjectArrayElement(env, retArray, 0, sigArray);
+
+  intsByteArray = (*env)->NewByteArray(env, 1);
+  (*env)->SetByteArrayRegion(env, intsByteArray, 0, 1, (jbyte*)intsarray);
+  (*env)->SetObjectArrayElement(env, retArray, 1, intsByteArray);
+
+  (void)classObject;
+
+  return retArray;
+}
+
+JNIEXPORT jobjectArray JNICALL Java_org_bitcoin_NativeSecp256k1_secp256k1_1ecdh
+  (JNIEnv* env, jclass classObject, jobject byteBufferObject, jlong ctx_l, jint publen)
+{
+  secp256k1_context *ctx = (secp256k1_context*)ctx_l;
+  const unsigned char* secdata = (*env)->GetDirectBufferAddress(env, byteBufferObject);
+  const unsigned char* pubdata = (const unsigned char*) (secdata + 32);
+
+  jobjectArray retArray;
+  jbyteArray outArray, intsByteArray;
+  unsigned char intsarray[1];
+  secp256k1_pubkey pubkey;
+  unsigned char nonce_res[32];
+  size_t outputLen = 32;
+
+  int ret = secp256k1_ec_pubkey_parse(ctx, &pubkey, pubdata, publen);
+
+  if (ret) {
+    ret = secp256k1_ecdh(
+      ctx,
+      nonce_res,
+      &pubkey,
+      secdata
+    );
+  }
+
+  intsarray[0] = ret;
+
+  retArray = (*env)->NewObjectArray(env, 2,
+    (*env)->FindClass(env, "[B"),
+    (*env)->NewByteArray(env, 1));
+
+  outArray = (*env)->NewByteArray(env, outputLen);
+  (*env)->SetByteArrayRegion(env, outArray, 0, 32, (jbyte*)nonce_res);
+  (*env)->SetObjectArrayElement(env, retArray, 0, outArray);
+
+  intsByteArray = (*env)->NewByteArray(env, 1);
+  (*env)->SetByteArrayRegion(env, intsByteArray, 0, 1, (jbyte*)intsarray);
+  (*env)->SetObjectArrayElement(env, retArray, 1, intsByteArray);
+
+  (void)classObject;
+
+  return retArray;
 }
