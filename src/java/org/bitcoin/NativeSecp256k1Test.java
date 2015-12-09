@@ -281,9 +281,9 @@ public class NativeSecp256k1Test {
     public static void main(String[] args) throws AssertFailException{
 
 
-      System.out.println("\n libsecp256k1 enabled: " + Secp256k1Context.isEnabled() + "\n");
+        System.out.println("\n libsecp256k1 enabled: " + Secp256k1Context.isEnabled() + "\n");
 
-      if( Secp256k1Context.isEnabled() ) {
+        assertEquals( Secp256k1Context.isEnabled(), true, "isEnabled" );
 
         //Test verify() success/fail
         testVerifyPos();
@@ -347,6 +347,5 @@ public class NativeSecp256k1Test {
 
         System.out.println(" All tests passed." );
 
-      }
     }
 }
