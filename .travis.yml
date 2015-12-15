@@ -30,7 +30,7 @@ env:
     - BUILD=distcheck
     - EXTRAFLAGS=CPPFLAGS=-DDETERMINISTIC
     - EXTRAFLAGS=CFLAGS=-O0
-    - BUILD=check-java ECDH=yes SCHNORR=yes
+    - BUILD=check-java ECDH=yes SCHNORR=yes EXPERIMENTAL=yes
 matrix:
   fast_finish: true
   include:
