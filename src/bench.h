@@ -7,15 +7,16 @@
 #ifndef SECP256K1_BENCH_H
 #define SECP256K1_BENCH_H
 
+#include <time.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
 #include "sys/time.h"
 
 static int64_t gettime_i64(void) {
-    struct timeval tv;
-    gettimeofday(&tv, NULL);
-    return (int64_t)tv.tv_usec + (int64_t)tv.tv_sec * 1000000LL;
+    struct timespec ts;
+    clock_gettime(CLOCK_MONOTONIC_RAW, &ts);
+    return (int64_t)ts.tv_nsec + (int64_t)ts.tv_sec * 1000000000LL;
 }
 
 #define FP_EXP (6)
@@ -99,11 +100,11 @@ void run_benchmark(char *name, void (*benchmark)(void*), void (*setup)(void*), v
     }
     printf("%s: min ", name);
     print_number(min * FP_MULT / iter);
-    printf("us / avg ");
+    printf("ns / avg ");
     print_number(((sum * FP_MULT) / count) / iter);
-    printf("us / max ");
+    printf("ns / max ");
     print_number(max * FP_MULT / iter);
-    printf("us\n");
+    printf("ns\n");
 }
 
 int have_flag(int argc, char** argv, char *flag) {
