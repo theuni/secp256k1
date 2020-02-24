@@ -78,14 +78,18 @@ if USE_BENCHMARK
 noinst_PROGRAMS += bench_verify bench_sign bench_internal bench_ecmult
 bench_verify_SOURCES = src/bench_verify.c
 bench_verify_LDADD = libsecp256k1.la $(SECP_LIBS) $(SECP_TEST_LIBS) $(COMMON_LIB)
+bench_verify_LDFLAGS = -static
 bench_sign_SOURCES = src/bench_sign.c
 bench_sign_LDADD = libsecp256k1.la $(SECP_LIBS) $(SECP_TEST_LIBS) $(COMMON_LIB)
+bench_sign_LDFLAGS = -static
 bench_internal_SOURCES = src/bench_internal.c
 bench_internal_LDADD = $(SECP_LIBS) $(COMMON_LIB)
 bench_internal_CPPFLAGS = -DSECP256K1_BUILD $(SECP_INCLUDES)
+bench_internal_LDFLAGS = -static
 bench_ecmult_SOURCES = src/bench_ecmult.c
 bench_ecmult_LDADD = $(SECP_LIBS) $(COMMON_LIB)
 bench_ecmult_CPPFLAGS = -DSECP256K1_BUILD $(SECP_INCLUDES)
+bench_ecmult_LDFLAGS = -static
 endif
 
 TESTS =
