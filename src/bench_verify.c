@@ -7,6 +7,12 @@
 #include <stdio.h>
 #include <string.h>
 
+#if defined(__clang__)
+#pragma clang optimize off
+#elif defined(__GNUC__)
+#pragma GCC optimize ("O0")
+#endif
+
 #include "include/secp256k1.h"
 #include "util.h"
 #include "bench.h"
