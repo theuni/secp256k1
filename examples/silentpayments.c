@@ -290,7 +290,7 @@ int main(void) {
             secp256k1_silentpayments_recipient_public_data public_data;
             secp256k1_pubkey spend_pubkey;
             size_t n_found_outputs;
-            struct labels_cache labels_cache;
+            struct labels_cache labels_cache = {0};
 
             for (i = 0; i < N_OUTPUTS; i++) {
                 found_output_ptrs[i] = &found_outputs[i];
