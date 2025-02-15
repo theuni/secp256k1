@@ -98,6 +98,8 @@ jobs:
         env: ${{ matrix.env_vars }}
         run: ./ci/ci.sh
 
+      - run: cat test-suite.log || true
+        if: ${{ always() }}
       - run: cat tests.log || true
         if: ${{ always() }}
       - run: cat noverify_tests.log || true
