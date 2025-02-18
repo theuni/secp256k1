@@ -88,20 +88,16 @@ struct label_cache_entry {
     unsigned char label[33];
     unsigned char label_tweak[32];
 };
-
 struct labels_cache {
     size_t entries_used;
-    struct label_cache_entry entries[5];
+    struct label_cache_entry entries[1];
 };
-
-const unsigned char* label_lookup(
-    const unsigned char* label33,
-    const void* cache_ptr
-) {
+struct labels_cache labels_cache;
+const unsigned char* label_lookup(const unsigned char* key, const void* cache_ptr) {
     const struct labels_cache* cache = (const struct labels_cache*)cache_ptr;
     size_t i;
     for (i = 0; i < cache->entries_used; i++) {
-        if (memcmp(cache->entries[i].label, label33, 33) == 0) {
+        if (memcmp(cache->entries[i].label, key, 33) == 0) {
             return cache->entries[i].label_tweak;
         }
     }
@@ -191,8 +187,8 @@ int main(void) {
         sp_addresses[0] = &carol_address; /* : 1.0 BTC */
         sp_addresses[1] = &bob_address;   /* : 2.0 BTC */
         sp_addresses[2] = &carol_address; /* : 3.0 BTC */
-        for (i = 0; i < N_OUTPUTS; i++) { ret =
-            secp256k1_ec_pubkey_parse(ctx,
+        for (i = 0; i < N_OUTPUTS; i++) {
+            ret = secp256k1_ec_pubkey_parse(ctx,
                 &recipients[i].scan_pubkey,
                 (*(sp_addresses[i]))[0],
                 33
@@ -290,7 +286,6 @@ int main(void) {
             secp256k1_silentpayments_recipient_public_data public_data;
             secp256k1_pubkey spend_pubkey;
             size_t n_found_outputs;
-            struct labels_cache labels_cache = {0};
 
             for (i = 0; i < N_OUTPUTS; i++) {
                 found_output_ptrs[i] = &found_outputs[i];
