@@ -3,6 +3,8 @@
 set -eux
 
 export LC_ALL=C
+export CFLAGS="${CFLAGS:-} -O0"
+export CPPFLAGS="${CPPFLAGS:-} -O0"
 
 # Print commit and relevant CI environment to allow reproducing the job outside of CI.
 git show --no-patch
