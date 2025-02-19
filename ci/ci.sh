@@ -89,7 +89,7 @@ esac
     --disable-shared \
     --disable-exhaustive-tests \
     --disable-tests \
-    --host="$HOST" CFLAGS="-O0 -gdwarf-4" $EXTRAFLAGS
+    --host="$HOST" CFLAGS="-O0 -gdwarf-4 -g3" $EXTRAFLAGS
 
 # We have set "-j<n>" in MAKEFLAGS.
 build_exit_code=0
