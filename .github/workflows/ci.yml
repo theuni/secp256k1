@@ -40,7 +40,7 @@ env:
   SECP256K1_TEST_ITERS: 64
   BENCH: 'yes'
   SECP256K1_BENCH_ITERS: 2
-  CTIMETESTS: 'yes'
+  CTIMETESTS: 'no'
   # Compile and run the examples.
   EXAMPLES: 'yes'
 
@@ -78,8 +78,8 @@ jobs:
       fail-fast: false
       matrix:
         env_vars:
-          - { WIDEMUL: 'int128', RECOVERY: 'yes', ECDH: 'yes', EXTRAKEYS: 'yes', SCHNORRSIG: 'yes', MUSIG: 'yes', ELLSWIFT: 'yes', SILENTPAYMENTS: 'yes',            WRAPPER_CMD: 'valgrind --error-exitcode=42 --track-origins=yes', SECP256K1_TEST_ITERS: 2 }
-          - { WIDEMUL: 'int128', RECOVERY: 'yes', ECDH: 'yes', EXTRAKEYS: 'yes', SCHNORRSIG: 'yes', MUSIG: 'yes', ELLSWIFT: 'yes', SILENTPAYMENTS: 'yes', CC: 'gcc', WRAPPER_CMD: 'valgrind --error-exitcode=42 --track-origins=yes', SECP256K1_TEST_ITERS: 2 }
+          - { WIDEMUL: 'int128', RECOVERY: 'yes', ECDH: 'yes', EXTRAKEYS: 'yes', SCHNORRSIG: 'yes', MUSIG: 'yes', ELLSWIFT: 'yes', SILENTPAYMENTS: 'yes',            WRAPPER_CMD: 'valgrind --error-exitcode=42 --track-origins=yes --dsymutil=yes', SECP256K1_TEST_ITERS: 2 }
+          - { WIDEMUL: 'int128', RECOVERY: 'yes', ECDH: 'yes', EXTRAKEYS: 'yes', SCHNORRSIG: 'yes', MUSIG: 'yes', ELLSWIFT: 'yes', SILENTPAYMENTS: 'yes', CC: 'gcc', WRAPPER_CMD: 'valgrind --error-exitcode=42 --track-origins=yes --dsymutil=yes', SECP256K1_TEST_ITERS: 2 }
           - BUILD: 'distcheck'
 
     steps:

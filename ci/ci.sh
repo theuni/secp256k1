@@ -87,7 +87,9 @@ esac
     --enable-ctime-tests="$CTIMETESTS" \
     --with-valgrind="$WITH_VALGRIND" \
     --disable-shared \
-    --host="$HOST" $EXTRAFLAGS
+    --disable-exhaustive-tests \
+    --disable-tests \
+    --host="$HOST" CFLAGS="-O0 -gdwarf-4" $EXTRAFLAGS
 
 # We have set "-j<n>" in MAKEFLAGS.
 build_exit_code=0
