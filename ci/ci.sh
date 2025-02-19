@@ -5,7 +5,7 @@ set -eux
 export LC_ALL=C
 export CFLAGS="${CFLAGS:-} -O0"
 export CPPFLAGS="${CPPFLAGS:-} -O0"
-
+export MallocNanoZone=0
 # Print commit and relevant CI environment to allow reproducing the job outside of CI.
 git show --no-patch
 print_environment() {
@@ -87,6 +87,7 @@ esac
     --enable-ctime-tests="$CTIMETESTS" \
     --with-valgrind="$WITH_VALGRIND" \
     --disable-shared \
+    --disable-tests \
     --disable-exhaustive-tests \
     --host="$HOST" CFLAGS="-O0 -gdwarf-4 -g3" $EXTRAFLAGS
 
