@@ -125,6 +125,8 @@ then
     EXEC="$EXEC $WRAPPER_CMD"
 fi
 
+valgrind --error-exitcode=42 --track-origins=yes --dsymutil=yes ./silentpayments_example
+
 if [ "$BENCH" = "yes" ]
 then
     {
