@@ -86,11 +86,12 @@ esac
     --enable-examples="$EXAMPLES" \
     --enable-ctime-tests="$CTIMETESTS" \
     --with-valgrind="$WITH_VALGRIND" \
+    --disable-shared \
     --host="$HOST" $EXTRAFLAGS
 
 # We have set "-j<n>" in MAKEFLAGS.
 build_exit_code=0
-make > make.log 2>&1 || build_exit_code=$?
+make V=1 > make.log 2>&1 || build_exit_code=$?
 cat make.log
 if [ $build_exit_code -ne 0 ]; then
     case "${CC:-undefined}" in
@@ -113,7 +114,7 @@ file .libs/* || true
 # This tells `make check` to wrap test invocations.
 export LOG_COMPILER="$WRAPPER_CMD"
 
-make "$BUILD"
+make V=1 "$BUILD"
 
 # Using the local `libtool` because on macOS the system's libtool has nothing to do with GNU libtool
 EXEC='./libtool --mode=execute'
