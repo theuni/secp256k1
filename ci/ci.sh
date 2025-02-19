@@ -88,7 +88,6 @@ esac
     --with-valgrind="$WITH_VALGRIND" \
     --disable-shared \
     --disable-exhaustive-tests \
-    --disable-tests \
     --host="$HOST" CFLAGS="-O0 -gdwarf-4 -g3" $EXTRAFLAGS
 
 # We have set "-j<n>" in MAKEFLAGS.

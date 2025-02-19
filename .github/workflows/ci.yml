@@ -78,8 +78,8 @@ jobs:
       fail-fast: false
       matrix:
         env_vars:
-          - { WIDEMUL: 'int128', RECOVERY: 'yes', ECDH: 'yes', EXTRAKEYS: 'yes', SCHNORRSIG: 'yes', MUSIG: 'yes', ELLSWIFT: 'yes', SILENTPAYMENTS: 'yes',            WRAPPER_CMD: 'valgrind --error-exitcode=42 --track-origins=yes --dsymutil=yes', SECP256K1_TEST_ITERS: 2 }
-          - { WIDEMUL: 'int128', RECOVERY: 'yes', ECDH: 'yes', EXTRAKEYS: 'yes', SCHNORRSIG: 'yes', MUSIG: 'yes', ELLSWIFT: 'yes', SILENTPAYMENTS: 'yes', CC: 'gcc', WRAPPER_CMD: 'valgrind --error-exitcode=42 --track-origins=yes --dsymutil=yes', SECP256K1_TEST_ITERS: 2 }
+          - { WIDEMUL: 'int128', RECOVERY: 'yes', ECDH: 'yes', EXTRAKEYS: 'yes', SCHNORRSIG: 'yes', MUSIG: 'yes', ELLSWIFT: 'yes', SILENTPAYMENTS: 'yes',            WRAPPER_CMD: 'valgrind --error-exitcode=42 --track-origins=yes --dsymutil=yes --leak-check=full', SECP256K1_TEST_ITERS: 2 }
+          - { WIDEMUL: 'int128', RECOVERY: 'yes', ECDH: 'yes', EXTRAKEYS: 'yes', SCHNORRSIG: 'yes', MUSIG: 'yes', ELLSWIFT: 'yes', SILENTPAYMENTS: 'yes', CC: 'gcc', WRAPPER_CMD: 'valgrind --error-exitcode=42 --track-origins=yes --dsymutil=yes --leak-check=full', SECP256K1_TEST_ITERS: 2 }
           - BUILD: 'distcheck'
 
     steps:
