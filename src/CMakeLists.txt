@@ -37,6 +37,12 @@ target_include_directories(secp256k1 INTERFACE
   $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
 )
 
+# Helper lib for inserting secp into another static library
+add_library(secp256k1_objs INTERFACE EXCLUDE_FROM_ALL)
+target_sources(secp256k1_objs INTERFACE $<TARGET_OBJECTS:secp256k1_precomputed> $<TARGET_OBJECTS:secp256k1>)
+target_include_directories(secp256k1_objs INTERFACE $<$<NOT:$<BOOL:${PROJECT_IS_TOP_LEVEL}>>:${PROJECT_SOURCE_DIR}/include>)
+target_link_libraries(secp256k1_objs INTERFACE secp256k1_asm)
+
 # This emulates Libtool to make sure Libtool and CMake agree on the ABI version,
 # see below "Calculate the version variables" in build-aux/ltmain.sh.
 math(EXPR ${PROJECT_NAME}_soversion "${${PROJECT_NAME}_LIB_VERSION_CURRENT} - ${${PROJECT_NAME}_LIB_VERSION_AGE}")
